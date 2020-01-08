@@ -94,8 +94,8 @@ func GetPokemonDetails(uniqueID int) (Pokemon, error) {
 }
 
 //GetGenerationAvailability returns the list of generations applicable to a pokemon
-func GetGenerationAvailability(params Pokemon) ([]int, error) {
-	query := "SELECT p_t.generation_id FROM pokemon_stats AS p_t %s"
+func GetGenerationAvailability(params Pokemon) ([]Generation, error) {
+	query := "SELECT p_t.generation_id AS id, generation.name FROM pokemon_stats AS p_t JOIN generation ON generation.id = p_t.generation_id %s"
 	whereConditions := []string{}
 	var whereParams []interface{}
 	if params.ID != "" {
@@ -111,7 +111,7 @@ func GetGenerationAvailability(params Pokemon) ([]int, error) {
 	whereClause = "WHERE" + strings.Join(whereConditions, "AND")
 	finalQuery := fmt.Sprintf(query, whereClause)
 	db := container.GetDbReader()
-	var generationList []int
+	var generationList []Generation
 	err := db.Select(&generationList, finalQuery, whereParams...)
 	if err != nil {
 		return nil, err
