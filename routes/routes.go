@@ -9,6 +9,7 @@ import (
 func Set(e *echo.Echo) {
 	e.GET("/pokemon", handlers.ListPokemon)
 	e.GET("/pokemon/:id", handlers.GetPokemonDetails)
+	e.GET("/pokemon/generations", handlers.GetGenerationAvailability)
 	e.GET("/generations", handlers.ListGenerations)
 	e.GET("/types", handlers.ListTypes)
 }

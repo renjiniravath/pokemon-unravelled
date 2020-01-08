@@ -69,10 +69,8 @@ func ListPokemon(params *Pokemon, page int) (*[]Pokemon, int, error) {
 	finalQuery := fmt.Sprintf(query, whereClause, start, config.Current.PokemonPerPage)
 	db := container.GetDbReader()
 	list := []Pokemon{}
-	// fmt.Println("finalQuery ", finalQuery, " whereParams ", whereParams)
 	err := db.Select(&list, finalQuery, whereParams...)
 	if err != nil {
-		// fmt.Println("err ", err)
 		return nil, 0, err
 	}
 	var count int
@@ -92,6 +90,31 @@ func GetPokemonDetails(uniqueID int) (Pokemon, error) {
 	var pokemon Pokemon
 	row := db.QueryRowx(query, uniqueID)
 	err := row.StructScan(&pokemon)
-	fmt.Println("err ", err)
 	return pokemon, err
+}
+
+//GetGenerationAvailability returns the list of generations applicable to a pokemon
+func GetGenerationAvailability(params Pokemon) ([]int, error) {
+	query := "SELECT p_t.generation_id FROM pokemon_stats AS p_t %s"
+	whereConditions := []string{}
+	var whereParams []interface{}
+	if params.ID != "" {
+		whereConditions = append(whereConditions, "(p_t.pokemon_id = ?)")
+		key := params.ID
+		whereParams = append(whereParams, key)
+	}
+	if *params.FormID != 0 {
+		whereConditions = append(whereConditions, "(p_t.form_id = ?)")
+		whereParams = append(whereParams, *params.FormID)
+	}
+	whereClause := ""
+	whereClause = "WHERE" + strings.Join(whereConditions, "AND")
+	finalQuery := fmt.Sprintf(query, whereClause)
+	db := container.GetDbReader()
+	var generationList []int
+	err := db.Select(&generationList, finalQuery, whereParams...)
+	if err != nil {
+		return nil, err
+	}
+	return generationList, nil
 }

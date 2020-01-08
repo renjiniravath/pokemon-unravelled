@@ -80,3 +80,31 @@ func GetPokemonDetails(c echo.Context) error {
 	logger.Success.Info("Pokemon details successfully shown")
 	return c.JSON(http.StatusOK, result)
 }
+
+//GetGenerationAvailability returns the list of generations applicable to a pokemon
+func GetGenerationAvailability(c echo.Context) error {
+	logger.Info.Info("Getting list of generations applicable to a pokemon")
+	request := new(struct {
+		ID     string `json:"id"`
+		FormID int    `json:"formId"`
+	})
+	result := new(struct {
+		Data interface{} `json:"data"`
+	})
+	if err := c.Bind(request); err != nil {
+		logger.Error.Error("Wrong format inserted")
+		return echo.NewHTTPError(http.StatusBadRequest, "Wrong format inserted")
+	}
+	pokemon := models.Pokemon{
+		ID:     request.ID,
+		FormID: &request.FormID,
+	}
+	generationsList, err := models.GetGenerationAvailability(pokemon)
+	if err != nil {
+		logger.Error.Error("Error while getting generations applicable to pokemon", err)
+		return echo.NewHTTPError(http.StatusNotAcceptable, "Error while getting generations applicable to pokemon", err)
+	}
+	result.Data = generationsList
+	logger.Success.Info("Applicable generations list fetched successfully")
+	return c.JSON(http.StatusOK, result)
+}
