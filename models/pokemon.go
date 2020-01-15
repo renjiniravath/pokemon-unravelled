@@ -106,12 +106,15 @@ func GetGenerationAvailability(params Pokemon) ([]Generation, error) {
 	if *params.FormID != 0 {
 		whereConditions = append(whereConditions, "(p_t.form_id = ?)")
 		whereParams = append(whereParams, *params.FormID)
+	} else {
+		whereConditions = append(whereConditions, "(p_t.form_id IS NULL)")
 	}
 	whereClause := ""
 	whereClause = "WHERE" + strings.Join(whereConditions, "AND")
 	finalQuery := fmt.Sprintf(query, whereClause)
 	db := container.GetDbReader()
 	var generationList []Generation
+	fmt.Println(finalQuery, whereParams)
 	err := db.Select(&generationList, finalQuery, whereParams...)
 	if err != nil {
 		return nil, err
