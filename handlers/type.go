@@ -1,10 +1,11 @@
 package handlers
 
 import (
-	"github.com/labstack/echo"
-	"github.com/renjiniravath/pokemon-unravelled/core/logger"
-	"github.com/renjiniravath/pokemon-unravelled/models"
 	"net/http"
+
+	"github.com/labstack/echo"
+	"github.com/renjiniravath/pokemon-unravelled/controller"
+	"github.com/renjiniravath/pokemon-unravelled/core/logger"
 )
 
 //ListTypes lists all types
@@ -14,7 +15,7 @@ func ListTypes(c echo.Context) error {
 		Data  interface{} `json:"data"`
 		Total int         `json:"total"`
 	})
-	types, total, err := models.ListTypes()
+	types, total, err := controller.ListTypes()
 	if err != nil {
 		logger.Error.Error("Error while list of types", err)
 		return echo.NewHTTPError(http.StatusNotAcceptable, "Error while list of types")

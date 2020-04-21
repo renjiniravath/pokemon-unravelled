@@ -7,6 +7,7 @@ import (
 
 	"github.com/labstack/echo"
 	"github.com/renjiniravath/pokemon-unravelled/config"
+	"github.com/renjiniravath/pokemon-unravelled/controller"
 	"github.com/renjiniravath/pokemon-unravelled/core/logger"
 	"github.com/renjiniravath/pokemon-unravelled/models"
 )
@@ -43,7 +44,7 @@ func ListPokemon(c echo.Context) error {
 		FormID:          &request.FormID,
 		GenerationID:    request.GenerationID,
 	}
-	pokemons, total, err := models.ListPokemon(&pokemon, request.Page)
+	pokemons, total, err := controller.ListPokemon(&pokemon, request.Page)
 	if err != nil {
 		logger.Error.Error("Error while getting pokemon list", err)
 		return echo.NewHTTPError(http.StatusNotAcceptable, "Error while getting pokemon list")
@@ -71,7 +72,7 @@ func GetPokemonDetails(c echo.Context) error {
 	result := new(struct {
 		Data interface{} `json:"data"`
 	})
-	pokemon, err := models.GetPokemonDetails(uniqueID)
+	pokemon, err := controller.GetPokemonDetails(uniqueID)
 	if err != nil {
 		logger.Error.Error("Error while getting details of pokemon table id ", uniqueID)
 		return echo.NewHTTPError(http.StatusNotAcceptable, "Error while getting details of pokemon table id ", uniqueID)
@@ -99,7 +100,7 @@ func GetGenerationAvailability(c echo.Context) error {
 		ID:     request.ID,
 		FormID: &request.FormID,
 	}
-	generationsList, err := models.GetGenerationAvailability(pokemon)
+	generationsList, err := controller.GetGenerationAvailability(pokemon)
 	if err != nil {
 		logger.Error.Error("Error while getting generations applicable to pokemon", err)
 		return echo.NewHTTPError(http.StatusNotAcceptable, "Error while getting generations applicable to pokemon", err)
