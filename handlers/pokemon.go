@@ -61,7 +61,7 @@ func ListPokemon(c echo.Context) error {
 	return c.JSON(http.StatusOK, result)
 }
 
-//GetPokemonDetails getsthe details of a pokemon
+//GetPokemonDetails gets all the details of a pokemon
 func GetPokemonDetails(c echo.Context) error {
 	logger.Info.Info("Getting details of pokemon")
 	uniqueID, err := strconv.Atoi(c.Param("id"))
@@ -82,28 +82,51 @@ func GetPokemonDetails(c echo.Context) error {
 	return c.JSON(http.StatusOK, result)
 }
 
+//GetPokemonData gets the data of all forms of a particular pokemon in a particular generation
+func GetPokemonData(c echo.Context) error {
+	logger.Info.Info("Getting the data of all forms of a pokemon")
+	pokemonID, err := strconv.Atoi(c.Param("pokemonId"))
+	if err != nil {
+		logger.Error.Error("Wrong format for pokemonID inserted ", err.Error())
+		return echo.NewHTTPError(http.StatusBadRequest, "Wrong format for pokemonID inserted")
+	}
+	generationID, err := strconv.Atoi(c.Param("generationId"))
+	if err != nil {
+		logger.Error.Error("Wrong format for generationID inserted")
+		return echo.NewHTTPError(http.StatusBadRequest, "Wrong format for generationID inserted")
+	}
+	result := new(struct {
+		Data        interface{} `json:"data"`
+		PrevPokemon interface{} `json:"prevPokemon"`
+		NextPokemon interface{} `json:"nextPokemon"`
+	})
+	pokemonData, prevPokemon, nextPokemon, err := controller.GetPokemonData(pokemonID, generationID)
+	if err != nil {
+		logger.Error.Error("Error while getting data of pokemon id ", pokemonID, " generation id ", generationID, err)
+		return echo.NewHTTPError(http.StatusNotAcceptable, "Error while getting data of pokemon id ", pokemonID, " generation id ", generationID)
+	}
+	result.Data = pokemonData
+	result.PrevPokemon = prevPokemon
+	result.NextPokemon = nextPokemon
+	logger.Success.Info("Pokemon data successfully returned")
+	return c.JSON(http.StatusOK, result)
+}
+
 //GetGenerationAvailability returns the list of generations applicable to a pokemon
 func GetGenerationAvailability(c echo.Context) error {
 	logger.Info.Info("Getting list of generations applicable to a pokemon")
-	request := new(struct {
-		ID     string `json:"id"`
-		FormID int    `json:"formId"`
-	})
+	pokemonID, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		logger.Error.Error("PokemonID inserted wrong ", err.Error())
+		return echo.NewHTTPError(http.StatusBadRequest, "PokemonID inserted wrong")
+	}
 	result := new(struct {
 		Data interface{} `json:"data"`
 	})
-	if err := c.Bind(request); err != nil {
-		logger.Error.Error("Wrong format inserted")
-		return echo.NewHTTPError(http.StatusBadRequest, "Wrong format inserted")
-	}
-	pokemon := models.Pokemon{
-		ID:     request.ID,
-		FormID: &request.FormID,
-	}
-	generationsList, err := controller.GetGenerationAvailability(pokemon)
+	generationsList, err := controller.GetGenerationAvailability(pokemonID)
 	if err != nil {
-		logger.Error.Error("Error while getting generations applicable to pokemon", err)
-		return echo.NewHTTPError(http.StatusNotAcceptable, "Error while getting generations applicable to pokemon", err)
+		logger.Error.Error("Error while getting generations applicable to pokemon", err.Error())
+		return echo.NewHTTPError(http.StatusNotAcceptable, "Error while getting generations applicable to pokemon")
 	}
 	result.Data = generationsList
 	logger.Success.Info("Applicable generations list fetched successfully")

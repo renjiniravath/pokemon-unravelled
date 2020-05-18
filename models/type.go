@@ -1,4 +1,3 @@
-
 package models
 
 import (
@@ -7,12 +6,12 @@ import (
 
 //Type stores id and name of a game generation
 type Type struct {
-	ID int `json:"id" db:"id,omitempty"`
-	Name string `json:"name" db:"name,omitempty"`
+	ID   int    `json:"id,omitempty" db:"id"`
+	Name string `json:"name,omitempty" db:"name"`
 }
 
 //ListTypes lists all generations
-func ListTypes()([]Type, int, error){
+func ListTypes() ([]Type, int, error) {
 	query := "SELECT t.id, t.name FROM type AS t"
 	db := container.GetDbReader()
 	types := []Type{}
@@ -22,4 +21,3 @@ func ListTypes()([]Type, int, error){
 	}
 	return types, len(types), nil
 }
-
